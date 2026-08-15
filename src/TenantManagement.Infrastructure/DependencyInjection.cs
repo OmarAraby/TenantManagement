@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using TenantManagement.Core.Interfaces;
 using TenantManagement.Infrastructure.MultiTenancy;
 using TenantManagement.Infrastructure.Persistence;
+using TenantManagement.Infrastructure.Persistence.Context;
 using TenantManagement.Infrastructure.Persistence.Repositories;
 
 namespace TenantManagement.Infrastructure;

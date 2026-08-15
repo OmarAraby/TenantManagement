@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using TenantManagement.Core.Interfaces;
+using TenantManagement.Infrastructure.Persistence.Context;
 
 namespace TenantManagement.Infrastructure.Persistence.Repositories;
 

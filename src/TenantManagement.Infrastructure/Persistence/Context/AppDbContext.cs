@@ -5,7 +5,7 @@ using TenantManagement.Core.Entities;
 using TenantManagement.Core.Exceptions;
 using TenantManagement.Core.Interfaces;
 
-namespace TenantManagement.Infrastructure.Persistence;
+namespace TenantManagement.Infrastructure.Persistence.Context;
 
 public class AppDbContext : IdentityUserContext<User, Guid>
 {

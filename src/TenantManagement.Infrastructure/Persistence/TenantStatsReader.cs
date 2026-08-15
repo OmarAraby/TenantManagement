@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using TenantManagement.Core.Interfaces;
 using TenantManagement.Core.Models;
+using TenantManagement.Infrastructure.Persistence.Context;
 
 namespace TenantManagement.Infrastructure.Persistence;
 

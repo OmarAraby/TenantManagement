@@ -1,4 +1,5 @@
 using TenantManagement.Core.Interfaces;
+using TenantManagement.Infrastructure.Persistence.Context;
 
 namespace TenantManagement.Infrastructure.Persistence;
 

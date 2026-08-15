@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TenantManagement.Core.Entities;
 using TenantManagement.Core.Interfaces;
+using TenantManagement.Infrastructure.Persistence.Context;
 
 namespace TenantManagement.Infrastructure.Persistence.Repositories;
 
