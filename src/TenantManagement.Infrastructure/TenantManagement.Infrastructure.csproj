@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\TenantManagement.Application\TenantManagement.Application.csproj" />
+    <ProjectReference Include="..\TenantManagement.Core\TenantManagement.Core.csproj" />
+  </ItemGroup>
+
+</Project>
