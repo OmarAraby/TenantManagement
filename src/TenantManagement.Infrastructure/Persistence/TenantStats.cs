@@ -5,11 +5,11 @@ using TenantManagement.Infrastructure.Persistence.Context;
 
 namespace TenantManagement.Infrastructure.Persistence;
 
-public sealed class TenantStatsReader : ITenantStatsReader
+public sealed class TenantStats : ITenantStats
 {
     private readonly AppDbContext _context;
 
-    public TenantStatsReader(AppDbContext context)
+    public TenantStats(AppDbContext context)
     {
         _context = context;
     }

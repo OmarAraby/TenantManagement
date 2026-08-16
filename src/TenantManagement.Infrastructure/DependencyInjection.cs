@@ -37,7 +37,7 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         // Register the TenantStatsReader service 
-        services.AddScoped<ITenantStatsReader, TenantStatsReader>();  //for reading tenant stats that are not part of the unit of work and for hangfire jobs that has no context of the current tenant 
+        services.AddScoped<ITenantStats, TenantStats>();  //for reading tenant stats that are not part of the unit of work and for hangfire jobs that has no context of the current tenant 
 
         return services;
     }
