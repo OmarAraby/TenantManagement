@@ -1,0 +1,131 @@
+@host = http://localhost:5090
+@tenantA = 00000000-0000-0000-0000-000000000000
+@tenantB = 00000000-0000-0000-0000-000000000000
+@userId = 00000000-0000-0000-0000-000000000000
+
+### Create tenant A
+POST {{host}}/api/tenants
+Content-Type: application/json
+
+{
+  "name": "Contoso Ltd",
+  "slug": "contoso"
+}
+
+### Create tenant B
+POST {{host}}/api/tenants
+Content-Type: application/json
+
+{
+  "name": "Fabrikam Inc",
+  "slug": "fabrikam"
+}
+
+### Duplicate slug -> 409
+POST {{host}}/api/tenants
+Content-Type: application/json
+
+{
+  "name": "Contoso Again",
+  "slug": "contoso"
+}
+
+### Invalid slug -> 400
+POST {{host}}/api/tenants
+Content-Type: application/json
+
+{
+  "name": "Bad Slug",
+  "slug": "Not A Slug"
+}
+
+### Get tenant by id
+GET {{host}}/api/tenants/{{tenantA}}
+
+### Unknown tenant -> 404
+GET {{host}}/api/tenants/11111111-1111-1111-1111-111111111111
+
+### Create user in tenant A
+POST {{host}}/api/users
+Content-Type: application/json
+X-Tenant-Id: {{tenantA}}
+
+{
+  "fullName": "Ada Lovelace",
+  "email": "ada@contoso.com",
+  "role": "Admin"
+}
+
+### Same email in tenant A again -> 409
+POST {{host}}/api/users
+Content-Type: application/json
+X-Tenant-Id: {{tenantA}}
+
+{
+  "fullName": "Ada Duplicate",
+  "email": "ada@contoso.com",
+  "role": "Member"
+}
+
+### Same email in tenant B -> 201 (per-tenant uniqueness)
+POST {{host}}/api/users
+Content-Type: application/json
+X-Tenant-Id: {{tenantB}}
+
+{
+  "fullName": "Ada Elsewhere",
+  "email": "ada@contoso.com",
+  "role": "Member"
+}
+
+### Invalid role -> 400
+POST {{host}}/api/users
+Content-Type: application/json
+X-Tenant-Id: {{tenantA}}
+
+{
+  "fullName": "Bad Role",
+  "email": "bad@contoso.com",
+  "role": "Owner"
+}
+
+### List users in tenant A
+GET {{host}}/api/users
+X-Tenant-Id: {{tenantA}}
+
+### List users in tenant B (must not show tenant A users)
+GET {{host}}/api/users
+X-Tenant-Id: {{tenantB}}
+
+### Missing tenant header -> 400
+GET {{host}}/api/users
+
+### Malformed tenant header -> 400
+GET {{host}}/api/users
+X-Tenant-Id: not-a-guid
+
+### Update user
+PUT {{host}}/api/users/{{userId}}
+Content-Type: application/json
+X-Tenant-Id: {{tenantA}}
+
+{
+  "fullName": "Ada Lovelace Updated",
+  "email": "ada@contoso.com",
+  "role": "Member"
+}
+
+### Update another tenant's user -> 404
+PUT {{host}}/api/users/{{userId}}
+Content-Type: application/json
+X-Tenant-Id: {{tenantB}}
+
+{
+  "fullName": "Cross Tenant",
+  "email": "cross@contoso.com",
+  "role": "Member"
+}
+
+### Soft delete user -> 204
+DELETE {{host}}/api/users/{{userId}}
+X-Tenant-Id: {{tenantA}}
