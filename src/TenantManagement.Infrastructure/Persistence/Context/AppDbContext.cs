@@ -50,6 +50,9 @@ public class AppDbContext : IdentityUserContext<User, Guid>
             .HasQueryFilter(u => u.TenantId == CurrentTenantId && u.IsActive);
     }
 
+
+
+
     private void ApplyTenantAndAuditRules()
     {
         var now = DateTime.UtcNow;

@@ -19,7 +19,7 @@ public sealed class TenantStats : ITenantStats
         CancellationToken cancellationToken = default)
     {
         return await _context.Tenants
-            .IgnoreQueryFilters()
+            .IgnoreQueryFilters() //  so we cn skip global query filters that we put on the Users 
             .AsNoTracking()
             .OrderBy(tenant => tenant.Name)
             .Select(tenant => new TenantUserCount(
