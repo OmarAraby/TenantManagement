@@ -40,7 +40,7 @@ public sealed class TenantService : ITenantService
 
     public async Task<TenantResponse> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var tenant = await _unitOfWork.Tenants.GetByIdAsync(id, cancellationToken)
+       var tenant = await _unitOfWork.Tenants.GetByIdAsync(id, cancellationToken)
             ?? throw new NotFoundException("Tenant");
 
         return tenant.ToResponse();
