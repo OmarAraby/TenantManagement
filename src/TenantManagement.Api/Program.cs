@@ -1,7 +1,10 @@
 using System.Text.Json.Serialization;
 using Hangfire;
+using Hangfire.Dashboard;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.EntityFrameworkCore;
+using TenantManagement.Infrastructure.Persistence.Context;
 using TenantManagement.Api.Filters;
 using TenantManagement.Api.Jobs;
 using TenantManagement.Api.Middleware;
@@ -58,6 +61,14 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options => options.OperationFilter<TenantHeaderOperationFilter>());
 
 var app = builder.Build();
+
+// Off by default; docker-compose turns it on so the container is usable with one command.
+// Locally the schema is created with: dotnet ef database update
+if (app.Configuration.GetValue<bool>("Database:AutoMigrate"))
+{
+    using var scope = app.Services.CreateScope();
+    await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.MigrateAsync();
+}
 
 // First in the pipeline so it catches everything downstream, including tenant resolution.
 app.UseMiddleware<ExceptionHandlingMiddleware>();
