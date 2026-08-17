@@ -1,7 +1,9 @@
 using System.Text.Json.Serialization;
+using Hangfire;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using TenantManagement.Api.Filters;
+using TenantManagement.Api.Jobs;
 using TenantManagement.Api.Middleware;
 using TenantManagement.Api.OpenApi;
 using TenantManagement.Application;
@@ -13,10 +15,24 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
 
+// Hangfire shares the application database; it creates its own schema on first run.
+var connectionString = builder.Configuration.GetConnectionString(
+        TenantManagement.Infrastructure.DependencyInjection.ConnectionStringName)
+    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' was not found.");
+
+builder.Services.AddHangfire(configuration => configuration
+    .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+    .UseSqlServerStorage(connectionString));
+
+builder.Services.AddHangfireServer();
+builder.Services.AddScoped<ActiveUserCountJob>();
+
 
 builder.Services
     .AddControllers(options => options.Filters.Add<ValidationFilter>())
-    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));  // MVC input formatter for enums
+    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));  // MVC pipeline input formatter for enums
 
 // minimal APIs input formatter for enums
 builder.Services.ConfigureHttpJsonOptions(options =>
@@ -57,6 +73,14 @@ app.UseHttpsRedirection();
 app.UseMiddleware<TenantResolutionMiddleware>();
 
 app.UseAuthorization();
+
+
+app.UseHangfireDashboard("/hangfire");
+
+RecurringJob.AddOrUpdate<ActiveUserCountJob>(
+    "active-user-count",
+    job => job.RunAsync(CancellationToken.None),
+    Cron.Minutely);
 
 app.MapControllers();
 
