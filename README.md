@@ -115,9 +115,6 @@ TenantManagement.Infrastructure  EF Core, repositories, unit of work         -> 
 TenantManagement.Api             controllers, middleware, Hangfire           -> all of the above
 ```
 
-`Api` references `Infrastructure` only so `Program.cs` can call `AddInfrastructure(...)`. No EF
-Core type appears in a controller or a service — the application layer talks to `IUnitOfWork`
-and the repository interfaces defined in `Core`.
 
 ### Multi-tenancy
 
@@ -135,29 +132,6 @@ builder.Entity<User>()
     .HasQueryFilter(u => u.TenantId == CurrentTenantId && u.IsActive);
 ```
 
-Two details in that design are load-bearing and easy to get wrong:
-
-**The filter references the `DbContext`, not a captured object.** EF caches the model per context
-*type*. If the filter closed over an injected service held by a configuration class, that service
-would be captured once when the model was built and every later request would silently run under
-the **first** request's tenant. Referencing `CurrentTenantId` (a property on `AppDbContext`) makes
-EF re-evaluate it per instance.
-
-**`GetByIdAsync` does not use `DbSet.FindAsync`.** `Find` checks the change tracker before
-querying. An untracked lookup is filtered correctly, but if the entity is *already tracked*, Find
-returns it with the filter never evaluated — handing back another tenant's row. The generic
-repository uses an explicit filtered query instead:
-
-```csharp
-Entities.FirstOrDefaultAsync(e => EF.Property<Guid>(e, "Id") == id, cancellationToken);
-```
-
-Defence in depth: `SaveChanges` stamps `TenantId` on new users from the current scope, and throws
-`ForbiddenException` if a write would create or move a row outside the current tenant.
-
-Because another tenant's rows are *invisible* rather than *forbidden*, a cross-tenant request
-returns **404, not 403** — a 403 would confirm the resource exists.
-
 ### Data access
 
 Generic Repository + Unit of Work, as specified.
@@ -167,9 +141,6 @@ Generic Repository + Unit of Work, as specified.
   (`EmailExistsAsync`, `SlugExistsAsync`).
 - `IUnitOfWork` — owns the transaction boundary and exposes both repositories.
 
-Repositories accept `Expression<Func<T,bool>>` predicates but **never expose `IQueryable`**. An
-escaping `IQueryable` would let callers compose provider-specific query trees, leak the
-persistence technology upward, and make the seam untestable without a database.
 
 ### Background job
 
@@ -179,6 +150,9 @@ Dashboard at `/hangfire`.
 `[DisableConcurrentExecution]` prevents overlapping runs; `[AutomaticRetry(Attempts = 2)]` covers
 transient database failures.
 
+<img width="682" height="238" alt="image" src="https://github.com/user-attachments/assets/15f47c77-578d-4425-879b-d9a5522d16d5" />
+
+<img width="1600" height="852" alt="image" src="https://github.com/user-attachments/assets/7777b858-97be-4b04-bd59-30f319cc5a9d" />
 
 
 ---
