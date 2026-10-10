@@ -34,7 +34,7 @@ builder.Services.AddScoped<ActiveUserCountJob>();
 
 
 builder.Services
-    .AddControllers(options => options.Filters.Add<ValidationFilter>())
+    .AddControllers(options => options.Filters.Add<ValidationFilter>())  // global 
     .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));  // MVC pipeline input formatter for enums
 
 // minimal APIs input formatter for enums

@@ -50,7 +50,7 @@ public sealed class ExceptionHandlingMiddleware
         {
             _logger.LogError(exception, "Unhandled exception on {Method} {Path}", context.Request.Method, context.Request.Path);
 
-            if (_environment.IsDevelopment())
+            if (_environment.IsDevelopment())  // only in dev  mode, include the exception details in the response
             {
                 errors.Add(exception.ToString());
             }
